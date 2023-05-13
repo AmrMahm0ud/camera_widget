@@ -60,10 +60,10 @@ class _CameraWidgetState extends State<CameraWidget> {
       if (e is CameraException) {
         switch (e.code) {
           case 'CameraAccessDenied':
-            // Handle access errors here.
+          // Handle access errors here.
             break;
           default:
-            // Handle other errors here.
+          // Handle other errors here.
             break;
         }
       }
@@ -93,22 +93,22 @@ class _CameraWidgetState extends State<CameraWidget> {
             Transform.scale(
               scale: 0.85,
               child: Container(
-                width: 290,
-                height: 50,
+                width: 310,
+                height: 140,
                 child: ClipRect(
                     child: OverflowBox(
-                  alignment: Alignment.center,
-                  child: FittedBox(
-                      fit: BoxFit.fitWidth,
-                      child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height /
-                              controller.value.aspectRatio,
-                          child: AspectRatio(
-                            aspectRatio: controller.value.aspectRatio,
-                            child: CameraPreview(controller),
-                          ))),
-                )),
+                      alignment: Alignment.center,
+                      child: FittedBox(
+                          fit: BoxFit.fitWidth,
+                          child: Container(
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height /
+                                  controller.value.aspectRatio,
+                              child: AspectRatio(
+                                aspectRatio: controller.value.aspectRatio,
+                                child: CameraPreview(controller),
+                              ))),
+                    )),
               ),
             ),
             ElevatedButton(
@@ -122,10 +122,10 @@ class _CameraWidgetState extends State<CameraWidget> {
                 child: Text("Take Pic")),
             cropedFile != null
                 ? Container(
-                    width: 300,
-                    height: 300,
-                    child: Image.file(cropedFile!),
-                  )
+              width: 300,
+              height: 300,
+              child: Image.file(cropedFile!),
+            )
                 : const SizedBox()
           ],
         ));
@@ -161,9 +161,9 @@ class _CameraWidgetState extends State<CameraWidget> {
     // final File imageFile = File('$path/path.jpg');
     // final List<int> imageBytes = await imageFile.readAsBytes();
     final img.Image? image =
-        img.decodeImage(Uint8List.fromList(file!.readAsBytesSync()));
+    img.decodeImage(Uint8List.fromList(file!.readAsBytesSync()));
 
-    final double desiredAspectRatio =7;
+    final double desiredAspectRatio = 1.7;
 
     final int imageWidth = image!.width;
     final int imageHeight = image.height;
@@ -179,14 +179,13 @@ class _CameraWidgetState extends State<CameraWidget> {
     // y = 0;
     // crop the image vertically
     width = imageWidth;
-    height = (imageHeight / desiredAspectRatio).round();
-    print(height);
+    height = (imageWidth / desiredAspectRatio).round();
     x = 0;
-    y = ((imageHeight - height) / 2).round();
+    y = ((imageHeight - height) / 2).round() - 15;
     print(y);
 
     final img.Image croppedImage =
-        img.copyCrop(image, x: x, y: y, width: width, height: height);
+    img.copyCrop(image, x: x, y: y, width: width, height: height);
 
     final File croppedImageFile = File('${file!.path}');
     cropedFile = await croppedImageFile.writeAsBytes(img.encodePng(croppedImage));
