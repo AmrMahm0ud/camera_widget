@@ -163,7 +163,7 @@ class _CameraWidgetState extends State<CameraWidget> {
     final img.Image? image =
     img.decodeImage(Uint8List.fromList(file!.readAsBytesSync()));
 
-    final double desiredAspectRatio = 1.7;
+    final double desiredAspectRatio = 2.6;
 
     final int imageWidth = image!.width;
     final int imageHeight = image.height;
@@ -179,7 +179,7 @@ class _CameraWidgetState extends State<CameraWidget> {
     // y = 0;
     // crop the image vertically
     width = imageWidth;
-    height = (imageWidth / desiredAspectRatio).round();
+    height = (imageHeight / desiredAspectRatio).round();
     x = 0;
     y = ((imageHeight - height) / 2).round() - 15;
     print(y);
