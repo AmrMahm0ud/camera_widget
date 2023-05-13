@@ -93,8 +93,8 @@ class _CameraWidgetState extends State<CameraWidget> {
             Transform.scale(
               scale: 0.85,
               child: Container(
-                width: 310,
-                height: 140,
+                width: 340,
+                height: 65,
                 child: ClipRect(
                     child: OverflowBox(
                       alignment: Alignment.center,
@@ -163,7 +163,7 @@ class _CameraWidgetState extends State<CameraWidget> {
     final img.Image? image =
     img.decodeImage(Uint8List.fromList(file!.readAsBytesSync()));
 
-    final double desiredAspectRatio = 2.6;
+    final double desiredAspectRatio = 10.5;
 
     final int imageWidth = image!.width;
     final int imageHeight = image.height;
