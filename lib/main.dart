@@ -5,8 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 
-void main() {
+late List<CameraDescription> _cameras;
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _cameras = await availableCameras();
+
   runApp(const MyApp());
 }
 
@@ -44,12 +48,9 @@ class CameraWidget extends StatefulWidget {
 
 class _CameraWidgetState extends State<CameraWidget> {
   late CameraController controller;
-  List<CameraDescription> _cameras = [];
 
   @override
-  void didChangeDependencies() async {
-    _cameras = await availableCameras();
-
+  void initState() {
     controller = CameraController(_cameras[0], ResolutionPreset.max);
     controller.initialize().then((_) {
       if (!mounted) {
@@ -60,21 +61,20 @@ class _CameraWidgetState extends State<CameraWidget> {
       if (e is CameraException) {
         switch (e.code) {
           case 'CameraAccessDenied':
-          // Handle access errors here.
+            // Handle access errors here.
             break;
           default:
-          // Handle other errors here.
+            // Handle other errors here.
             break;
         }
       }
     });
-    super.didChangeDependencies();
+    super.initState();
   }
 
   XFile? xfile;
   File? file;
   File? cropedFile;
-
 
   @override
   void dispose() {
@@ -84,51 +84,55 @@ class _CameraWidgetState extends State<CameraWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Transform.scale(
-              scale: 0.85,
-              child: Container(
-                width: 310,
-                height: 140,
-                child: ClipRect(
-                    child: OverflowBox(
-                      alignment: Alignment.center,
-                      child: FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: Container(
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height /
-                                  controller.value.aspectRatio,
-                              child: AspectRatio(
-                                aspectRatio: controller.value.aspectRatio,
-                                child: CameraPreview(controller),
-                              ))),
-                    )),
+    if (!controller.value.isInitialized) {
+      return Container();
+    } else {
+      return Scaffold(
+          appBar: AppBar(),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Transform.scale(
+                scale: 0.85,
+                child: Container(
+                  width: 310,
+                  height: 140,
+                  child: ClipRect(
+                      child: OverflowBox(
+                    alignment: Alignment.center,
+                    child: FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height /
+                                controller.value.aspectRatio,
+                            child: AspectRatio(
+                              aspectRatio: controller.value.aspectRatio,
+                              child: CameraPreview(controller),
+                            ))),
+                  )),
+                ),
               ),
-            ),
-            ElevatedButton(
-                onPressed: () async {
-                  xfile = await controller.takePicture();
+              ElevatedButton(
+                  onPressed: () async {
+                    xfile = await controller.takePicture();
 
-                  file = File(xfile!.path);
-                  cropedFile = await reSizeImage();
-                  setState(() {});
-                },
-                child: Text("Take Pic")),
-            cropedFile != null
-                ? Container(
-              width: 300,
-              height: 300,
-              child: Image.file(cropedFile!),
-            )
-                : const SizedBox()
-          ],
-        ));
+                    file = File(xfile!.path);
+                    cropedFile = await reSizeImage();
+                    setState(() {});
+                  },
+                  child: Text("Take Pic")),
+              cropedFile != null
+                  ? Container(
+                      width: 300,
+                      height: 300,
+                      child: Image.file(cropedFile!),
+                    )
+                  : const SizedBox()
+            ],
+          ));
+    }
   }
 
   Widget _buildCameraPreview() {
@@ -161,7 +165,7 @@ class _CameraWidgetState extends State<CameraWidget> {
     // final File imageFile = File('$path/path.jpg');
     // final List<int> imageBytes = await imageFile.readAsBytes();
     final img.Image? image =
-    img.decodeImage(Uint8List.fromList(file!.readAsBytesSync()));
+        img.decodeImage(Uint8List.fromList(file!.readAsBytesSync()));
 
     final double desiredAspectRatio = 1.7;
 
@@ -185,10 +189,11 @@ class _CameraWidgetState extends State<CameraWidget> {
     print(y);
 
     final img.Image croppedImage =
-    img.copyCrop(image, x: x, y: y, width: width, height: height);
+        img.copyCrop(image, x: x, y: y, width: width, height: height);
 
     final File croppedImageFile = File('${file!.path}');
-    cropedFile = await croppedImageFile.writeAsBytes(img.encodePng(croppedImage));
+    cropedFile =
+        await croppedImageFile.writeAsBytes(img.encodePng(croppedImage));
     return cropedFile;
 
     // File f = File("$path/path.jpg");
